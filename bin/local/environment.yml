@@ -1,0 +1,9 @@
+name: venv
+channels:
+  - conda-forge
+dependencies:
+  - python=3.8
+  - pandas
+  - pip
+  - pip:
+    - -r requirements.txt

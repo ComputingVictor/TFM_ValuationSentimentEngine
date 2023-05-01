@@ -1,0 +1,6 @@
+# Ignore csv, json and xlsx files
+*.csv
+*.json
+*.xlsx
+*.parquet
+*.h5
