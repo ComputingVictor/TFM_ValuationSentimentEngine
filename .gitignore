@@ -1,6 +1,8 @@
-# Ignore csv, json and xlsx files
+# Ignore csv, json and other files
 *.csv
 *.json
 *.xlsx
 *.parquet
 *.h5
+*.pkl
+*.pickle
