@@ -6,16 +6,19 @@ import nltk
 nltk.download('punkt')
 nltk.download('stopwords')
 from nltk.corpus import stopwords
-from collections import Counter
 import tensorflow as tf
-from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-from sklearn.feature_extraction.text import CountVectorizer
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, render_template
 import pickle
 
 
 def preprocess_text(text):
+
+    '''
+    Preprocesses the text to be used in the model.
+
+    '''
+
     stop_words = set(stopwords.words('english'))
 
     text = text.str.lower()
@@ -33,7 +36,7 @@ def preprocess_text(text):
 model = tf.keras.models.load_model('../models/nn_reviews.h5', compile=False)
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-# Load the tokenizer in models.
+# Load the tokenizer that trained the Neuronal Network.
 
 with open('../models/tokenizer.pickle', 'rb') as handle:
     tokenizer = pickle.load(handle)
@@ -45,15 +48,18 @@ app = Flask(__name__)
 @app.route('/')
 
 def index():
+
+    '''
+    Renders the home page.
+    '''
+
     return render_template('form.html')
 
 @app.route('/predict', methods=['POST'])
 
-# Function to predict the sentiment of the review.
-
 def predict():
     '''
-    For rendering results on HTML GUI
+    Predicts the class of the review.
     '''
     input_text = pd.Series(request.form['text'])
     input_text = preprocess_text(input_text)
