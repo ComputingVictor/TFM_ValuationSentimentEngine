@@ -13,26 +13,22 @@ import pickle
 
 
 def preprocess_text(text):
-
     '''
     Preprocesses the text to be used in the model.
-
     '''
-
     stop_words = set(stopwords.words('english'))
 
-    text = text.str.lower()
-    text = text.str.replace('@[^\s]+','')
-    text = text.str.replace('http\S+|www.\S+','')
-    text = text.str.replace('[\:\;\=][\-\^]?[\(\)\[\]\{\}\@D\|Pp\$\*\+\#]','')
-    text = text.str.replace('[^\w\s]','')
-    text = text.str.replace('\n',' ')
-    text = text.apply(nltk.word_tokenize)
-    text = text.apply(lambda x: [item for item in x if item not in stop_words])
-    text_processed = text.apply(lambda x: ' '.join(x))
+    text = text.lower()
+    text = text.replace('@[^\s]+','')
+    text = text.replace('http\S+|www.\S+','')
+    text = text.replace('[\:\;\=][\-\^]?[\(\)\[\]\{\}\@D\|Pp\$\*\+\#]','')
+    text = text.replace('[^\w\s]','')
+    text = text.replace('\n',' ')
+    text = nltk.word_tokenize(text)
+    text = [item for item in text if item not in stop_words]
+    text_processed = ' '.join(text)
 
     return text_processed
-
 # Load the model.
 
 model = tf.keras.models.load_model('../models/nn_tweets.h5', compile=False)
@@ -63,21 +59,31 @@ def predict():
     '''
     Predicts the class of the review.
     '''
-    input_text = pd.Series(request.form['text'])
+    input_text = pd.Series(request.form['text'])[0]
     input_text = preprocess_text(input_text)
-    input_text = tokenizer.texts_to_sequences(input_text)
-    input_text = pad_sequences(input_text, maxlen=25)
-    prediction = model.predict(input_text)[0]
-    class_predicted = np.argmax(prediction) + 1
-    clases_texto = {
-    1: "Neutral",
-    2: "Positive",
-    3: "Negative"
-    }
 
-    output = clases_texto[class_predicted]
+    # Convert the text to sequence of words
+    X_test_sequences = tokenizer.texts_to_sequences([input_text])
+
+    # Pad the sequence
+    X_test_padded = pad_sequences(X_test_sequences, maxlen=len(X_test_sequences), padding='post')
+
+    # Make predictions
+    predictions = model.predict(X_test_padded)
+
+    # Get the sentiment with the highest probability
+    sentiment = np.argmax(predictions)
+
+    # Put name to the sentiment
+
+    if sentiment == 0:
+        sentiment = 'Neutral'
+    elif sentiment == 1:
+        sentiment = 'Positive'
+    else:
+        sentiment = 'Negative'
     
-    return render_template('tweets_form.html', prediction_text='The tweet has a {} sentiment'.format(output))
+    return render_template('tweets_form.html', prediction_text='The tweet has a {} sentiment'.format(sentiment))
 
 if __name__ == "__main__":
 
