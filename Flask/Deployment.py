@@ -19,22 +19,27 @@ def preprocess_text(text):
 
     '''
 
+
     stop_words = set(stopwords.words('english'))
 
-    text = text.str.lower()
-    text = text.str.replace('[\:\;\=][\-\^]?[\(\)\[\]\{\}\@D\|Pp\$\*\+\#]','')
-    text = text.str.replace('[^\w\s]','')
-    text = text.str.replace('\n',' ')
-    text = text.apply(nltk.word_tokenize)
-    text = text.apply(lambda x: [item for item in x if item not in stop_words])
-    text_processed = text.apply(lambda x: ' '.join(x))
+    text = text.lower()
+    text = text.replace('@[^\s]+','')
+    text = text.replace('http\S+|www.\S+','')
+    text = text.replace('[\:\;\=][\-\^]?[\(\)\[\]\{\}\@D\|Pp\$\*\+\#]','')
+    text = text.replace('[^\w\s]','')
+    text = text.replace('\n',' ')
+    text = nltk.word_tokenize(text)
+    text = [item for item in text if item not in stop_words]
+    text_processed = ' '.join(text)
 
     return text_processed
+
 
 # Load the model.
 
 model = tf.keras.models.load_model('../models/nn_reviews.h5', compile=False)
-model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
 
 # Load the tokenizer that trained the Neuronal Network.
 
@@ -61,23 +66,33 @@ def predict():
     '''
     Predicts the class of the review.
     '''
-    input_text = pd.Series(request.form['text'])
+  
+    input_text = pd.Series(request.form['text'])[0]
     input_text = preprocess_text(input_text)
-    input_text = tokenizer.texts_to_sequences(input_text)
-    input_text = pad_sequences(input_text, maxlen=300)
-    prediction = model.predict(input_text)[0]
-    class_predicted = np.argmax(prediction) + 1
-    clases_texto = {
-    1: "1 estrella",
-    2: "2 estrellas",
-    3: "3 estrellas",
-    4: "4 estrellas",
-    5: "5 estrellas"
-    }
 
-    output = clases_texto[class_predicted]
-    
-    return render_template('form.html', prediction_text='The review is {}'.format(output))
+    X_test_sequences = tokenizer.texts_to_sequences([input_text])
+
+    # Pad the sequence
+
+    X_test_padded = pad_sequences(X_test_sequences, maxlen=len(X_test_sequences), padding='post')
+
+    # Make predictions
+
+    predictions = model.predict(X_test_padded)
+
+    # Get the sentiment with the highest probability
+
+    sentiment = np.argmax(predictions)
+
+
+        
+    return render_template('form.html', prediction_text='The review is {}'.format(sentiment))
+
+
+@app.after_request
+def add_header(response):
+    response.headers['Cache-Control'] = 'no-store'
+    return response
 
 if __name__ == "__main__":
 
