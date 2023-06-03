@@ -11,4 +11,4 @@
 
 # Exceptions
 
-!data/processed/*.csv
+!data/test/*.csv
