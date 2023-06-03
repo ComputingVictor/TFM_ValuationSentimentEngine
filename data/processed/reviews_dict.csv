@@ -1,0 +1,13 @@
+﻿Field Name;Description;Variable Type;Data Type;Example Value
+overall ;Calification of the product given by the buyer;Categorical;int64;5
+vote ;Total of votes that the review received by other users;Numerical;object;12
+verified ;Was the review verified?;Categorical;bool;True
+reviewTime ;Date and time when the review was published;Datetime;object;01 1, 2011 
+reviewerID ;ID of the reviewer;Categorical;object;A0095461J2PRARAMDCI
+asin            ;ID of the product;Categorical;object;B01H5PPJT4
+style ;Style/ Characteristics of the product;Dictionary;object;{'Gift Amount:': ' 50'}
+reviewerName ;Name of the reviewer;String;object;LEH
+reviewText ;Text of the review;String;object; got this gift card from a friend, and it was...
+summary ;Short resume about the review;String;object;Gift card with best selection
+unixReviewTime ;Date and time in UNIX format;Numerical;int64;1229472000
+image ;URL of the picture attached;String;object;https://images-na.ssl-images-amazon.com/image...

@@ -8,3 +8,7 @@
 *.pickle
 *.png
 *.jpg
+
+# Exceptions
+
+!data/processed/*.csv
