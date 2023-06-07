@@ -29,15 +29,6 @@ def preprocess_text(text):
     text_processed = ' '.join(text)
 
     return text_processed
-# Load the model.
-
-model = tf.keras.models.load_model('../models/nn_tweets.h5', compile=False)
-model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-# Load the tokenizer that trained the Neuronal Network.
-
-with open('../models/tweets_tokenizer.pickle', 'rb') as handle:
-    tokenizer = pickle.load(handle)
 
 # Flask app.
 
@@ -59,17 +50,33 @@ def predict():
     '''
     Predicts the class of the review.
     '''
-    input_text = pd.Series(request.form['text'])[0]
-    input_text = preprocess_text(input_text)
+
+        # Load the model
+    model = tf.keras.models.load_model('../models/nn_tweets (1).h5', compile=False)
+
+    # Compilar el modelo
+    model.compile(loss="sparse_categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
+
+    # Load the tokenizer that trained the Neuronal Network.
+
+    with open('../models/tweets_tokenizer.pickle', 'rb') as handle:
+        tokenizer = pickle.load(handle)
+
+
+    text = request.form['text']
+    input_text = preprocess_text(text)
 
     # Convert the text to sequence of words
-    X_test_sequences = tokenizer.texts_to_sequences([input_text])
+    X_tokenized = tokenizer.texts_to_sequences([input_text])
+
 
     # Pad the sequence
-    X_test_padded = pad_sequences(X_test_sequences, maxlen=len(X_test_sequences), padding='post')
+
+    max_sequence_length = 100  # Longitud máxima de una secuencia de palabras
+    X_padded = tf.keras.preprocessing.sequence.pad_sequences(X_tokenized, maxlen=max_sequence_length)
 
     # Make predictions
-    predictions = model.predict(X_test_padded)
+    predictions = model.predict(X_padded)
 
     # Get the sentiment with the highest probability
     sentiment = np.argmax(predictions)
@@ -77,15 +84,16 @@ def predict():
     # Put name to the sentiment
 
     if sentiment == 0:
-        sentiment = 'Neutral'
+            sentiment = 'Neutral'
     elif sentiment == 1:
-        sentiment = 'Positive'
+            sentiment = 'Positive'
     else:
-        sentiment = 'Negative'
-    
+            sentiment = 'Negative'
+        
     return render_template('tweets_form.html', prediction_text='The tweet has a {} sentiment'.format(sentiment))
 
 if __name__ == "__main__":
+
 
     app.run(debug=True)
 
