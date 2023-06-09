@@ -36,11 +36,11 @@ Carpetas:
 ## ¿Cómo replicar el proyecto?
 
 
-- 1. Instala el entorno virtual:
+-  Instala el entorno virtual:
 
-conda env create --name environment_name -f environment.yml
+`conda env create --name environment_name -f environment.yml`
 
-- 2. Introduce en la carpeta `data/raw` los siguientes archivos:
+- Introduce en la carpeta `data/raw` los siguientes archivos:
 
     - [Base de datos de Twitter](https://www.kaggle.com/datasets/kazanova/sentiment140/download?datasetVersionNumber=2)
 
