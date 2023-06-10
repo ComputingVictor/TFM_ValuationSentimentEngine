@@ -6,11 +6,9 @@ import nltk
 nltk.download('punkt')
 nltk.download('stopwords')
 from nltk.corpus import stopwords
-import tensorflow as tf
-from tensorflow.keras.preprocessing.sequence import pad_sequences
 from flask import Flask, request, render_template
 import pickle
-
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 def preprocess_text(text):
 
@@ -35,16 +33,16 @@ def preprocess_text(text):
     return text_processed
 
 
-# Load the model.
+# Load the ML model pkl.
 
-model = tf.keras.models.load_model('../models/nn_reviews.h5', compile=False)
-model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+with open('../models/logistic_model_resampled.pkl', 'rb') as handle:
+    model = pickle.load(handle)
 
 
-# Load the tokenizer that trained the Neuronal Network.
+# Load the tokenizer pkl.
 
-with open('../models/tokenizer.pickle', 'rb') as handle:
-    tokenizer = pickle.load(handle)
+with open('../models/tfidf_vectorizer.pkl', 'rb') as handle:
+    tfidf = pickle.load(handle)
 
 # Flask app.
 
@@ -70,23 +68,23 @@ def predict():
     input_text = pd.Series(request.form['text'])[0]
     input_text = preprocess_text(input_text)
 
-    X_test_sequences = tokenizer.texts_to_sequences([input_text])
+    # Convert input_text to string.
 
-    # Pad the sequence
+    input_text = [input_text]
 
-    X_test_padded = pad_sequences(X_test_sequences, maxlen=len(X_test_sequences), padding='post')
+    # Transform the text.
+
+    text_transformed = tfidf.transform(input_text)
 
     # Make predictions
 
-    predictions = model.predict(X_test_padded)
+    predictions = model.predict(text_transformed)
 
     # Get the sentiment with the highest probability
 
-    sentiment = np.argmax(predictions)
-
 
         
-    return render_template('form.html', prediction_text='The review is {}'.format(sentiment))
+    return render_template('form.html', prediction_text='The review is {}'.format(' '.join(str(p) for p in predictions)))
 
 
 @app.after_request
