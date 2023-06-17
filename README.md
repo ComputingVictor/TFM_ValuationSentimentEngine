@@ -7,6 +7,7 @@
 </p>
 
 
+## Descripción del proyecto
 
 Este proyecto final de máster tiene como objetivo realizar un análisis de sentimiento de valoración utilizando dos conjuntos de datos diferentes: uno de Twitter y otro de Amazon. El objetivo principal es analizar las opiniones y valoraciones de los usuarios en estas plataformas y determinar si son positivas, negativas o neutrales, además de la valoración en el caso de Amazon.
 
